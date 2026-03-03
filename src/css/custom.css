@@ -1,0 +1,73 @@
+/**
+ * Custom CSS — Cheatsheet Docs
+ */
+
+:root {
+  --ifm-color-primary: #10b981;
+  --ifm-color-primary-dark: #059669;
+  --ifm-color-primary-darker: #047857;
+  --ifm-color-primary-darkest: #065f46;
+  --ifm-color-primary-light: #34d399;
+  --ifm-color-primary-lighter: #6ee7b7;
+  --ifm-color-primary-lightest: #a7f3d0;
+  --ifm-code-font-size: 90%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #34d399;
+  --ifm-color-primary-dark: #10b981;
+  --ifm-color-primary-darker: #059669;
+  --ifm-color-primary-darkest: #047857;
+  --ifm-color-primary-light: #6ee7b7;
+  --ifm-color-primary-lighter: #a7f3d0;
+  --ifm-color-primary-lightest: #d1fae5;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Code blocks */
+.theme-code-block {
+  font-size: 0.875rem;
+}
+
+/* Navbar */
+.navbar__title {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* Tables */
+table {
+  display: table;
+  width: 100%;
+}
+
+th {
+  background: var(--ifm-color-emphasis-100);
+}
+
+td code {
+  white-space: nowrap;
+}
+
+/* Sidebar */
+.theme-doc-sidebar-item-category .menu__list {
+  border-left: 2px solid var(--ifm-color-emphasis-200);
+  margin-left: 0.75rem;
+}
+
+/* Content width */
+.container {
+  max-width: 980px;
+}
+
+/* Markdown headings */
+.markdown h2 {
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  padding-bottom: 0.5rem;
+  margin-top: 2.5rem;
+}
+
+.markdown h3 {
+  margin-top: 1.5rem;
+}
